@@ -1,0 +1,52 @@
+USE sakila;
+
+#1. Select the first name, last name, and email address of all the customers who have rented a movie.
+SELECT DISTINCT first_name, last_name, email FROM customer a
+JOIN rental b
+ON a.customer_id = b.customer_id;
+
+
+#2. What is the average payment made by each customer (display the customer id, customer name (concatenated), and the average payment made).
+SELECT a.customer_id, CONCAT(first_name, ' ', last_name) AS name, CONCAT(ROUND(AVG(amount),2), '€') AS average_payment FROM customer a
+JOIN payment b ON a.customer_id = b.customer_id
+GROUP BY a.customer_id
+ORDER BY average_payment DESC;
+
+#3. Select the name and email address of all the customers who have rented the "Action" movies.
+-- Write the query using multiple join statements
+
+SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS name, email FROM customer a 
+JOIN rental b ON a.customer_id = b.customer_id
+JOIN inventory c ON b.inventory_id = c.inventory_id
+JOIN film_category d ON c.film_id = d.film_id
+JOIN category e ON d.category_id = e.category_id
+WHERE name = "Action";
+
+-- Write the query using sub queries with multiple WHERE clause and IN condition
+
+SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS name, email FROM customer a
+WHERE a.customer_id IN (
+SELECT b.customer_id
+FROM rental b, inventory c, film d, film_category e, category f
+WHERE b.inventory_id = c.inventory_id
+AND c.film_id = d.film_id
+AND d.film_id = e.film_id
+AND e.category_id = f.category_id
+AND f.name = 'Action');
+    
+-- Verify if the above two queries produce the same results or not
+-- Yes!
+
+#4. Use the case statement to create a new column classifying existing columns as either or high value transactions based on the amount of payment. If the amount is between 0 and 2, label should be low and if the amount is between 2 and 4, the label should be medium, and if it is more than 4, then it should be high.
+SELECT customer_id, rental_id, amount,
+CASE
+WHEN amount BETWEEN 0 AND 2
+THEN "low"
+WHEN amount BETWEEN 2 AND 4
+THEN 'medium'
+WHEN amount > 4 THEN 'high'
+END AS trans_value
+FROM payment
+;
+
+
