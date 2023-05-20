@@ -26,13 +26,15 @@ WHERE name = "Action";
 
 SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS name, email FROM customer a
 WHERE a.customer_id IN (
-SELECT b.customer_id
-FROM rental b, inventory c, film d, film_category e, category f
-WHERE b.inventory_id = c.inventory_id
-AND c.film_id = d.film_id
-AND d.film_id = e.film_id
-AND e.category_id = f.category_id
-AND f.name = 'Action');
+	SELECT b.customer_id FROM rental b
+		WHERE b.inventory_id IN (
+			SELECT c.inventory_id FROM inventory c
+				WHERE c.film_id IN (
+					SELECT d.film_id FROM film_category d
+						WHERE d.category_id IN(
+							SELECT e.category_id FROM category e
+								WHERE e.name = 'Action'
+))));
     
 -- Verify if the above two queries produce the same results or not
 -- Yes!
